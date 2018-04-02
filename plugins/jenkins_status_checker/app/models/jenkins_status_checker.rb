@@ -7,12 +7,12 @@ class JenkinsStatusChecker
 
   def checklist
     items = []
-    results = check_jenkins
+    result = check_jenkins
 
-    if results.nil?
-      items << "Failed to retrieve jenkins checklist"
+    if result.is_a?(String) # error
+      items << result
     else
-      results["jobs"].each do |job|
+      result["jobs"].each do |job|
         items << "#{job["name"]} is not stable" if job["color"] != "blue"
       end
     end
@@ -24,16 +24,8 @@ class JenkinsStatusChecker
 
   def check_jenkins
     client.api_get_request(ENV.fetch('JENKINS_STATUS_CHECKER'))
-  rescue KeyError => e
-    Rails.logger.warn "Missing ENV variable for jenkins #{e}"
-    return nil
-  rescue Timeout::Error => e
-    Rails.logger.warn "Timeout while fetching jenkins checklist.  #{e.class} #{e}"
-    return nil
-  rescue JenkinsApi::Exceptions::ApiException => e
-    # Jenkins Api threw an error at us
-    Rails.logger.warn "ApiException while fetching jenkins checklist.  #{e.class} #{e}"
-    return nil
+  rescue
+    "Error: #{$!}"
   end
 
   def client

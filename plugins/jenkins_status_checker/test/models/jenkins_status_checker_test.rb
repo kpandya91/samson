@@ -23,9 +23,9 @@ describe JenkinsStatusChecker do
       [{JENKINS_STATUS_CHECKER: nil}, {JENKINS_URL: nil}].each do |env_var|
         with_env(env_var)
 
-        it "returns an error" do
-          message = ["Failed to retrieve jenkins checklist"]
-          assert_equal(message, JenkinsStatusChecker.instance.checklist)
+        it "returns a missing key error" do
+          message = /Error: key not found/
+          assert_match(message, JenkinsStatusChecker.instance.checklist[0])
         end
       end
     end
@@ -33,18 +33,16 @@ describe JenkinsStatusChecker do
     describe "when there are errors connecting" do
       let(:json_response) { "" }
 
-      it "handles timeout errors" do
+      it "reports timeout errors" do
         JenkinsApi::Client.any_instance.stubs(:api_get_request).raises(Timeout::Error)
-        # returns error msg
-        message = ["Failed to retrieve jenkins checklist"]
+        message = ["Error: Timeout::Error"]
         assert_equal(message, JenkinsStatusChecker.instance.checklist)
       end
 
-      it "handles api errors" do
+      it "reports api errors" do
         # needs a logger to instantiate
-        JenkinsApi::Client.any_instance.stubs(:api_get_request).raises(JenkinsApi::Exceptions::ApiException.new(Rails.logger))
-        # returns error msg
-        message = ["Failed to retrieve jenkins checklist"]
+        JenkinsApi::Client.any_instance.stubs(:api_get_request).raises(JenkinsApi::Exceptions::ApiException.new(Rails.logger), "Error message")
+        message = ["Error: Error message"]
         assert_equal(message, JenkinsStatusChecker.instance.checklist)
       end
     end

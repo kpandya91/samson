@@ -5,9 +5,9 @@ SingleCov.covered!
 
 describe JenkinsStatusChecker do
   describe :project_permitted_params do
-    it "adds show_jenkins_status_checker" do
+    it "adds jenkins_status_checker" do
       params = Samson::Hooks.fire(:project_permitted_params).flatten
-      params.must_include :show_jenkins_status_checker
+      params.must_include :jenkins_status_checker
     end
   end
 end
