@@ -21,7 +21,7 @@
       <% else %>
         <div class="col-sm-2">
           <%= label_tag :project %>
-          <%= text_field_tag 'search[project_name]', params.dig(:search, :project_name), placeholder: 'project name', class: "form-control" %>
+          <%= text_field_tag 'search[project_names]', params.dig(:search, :project_names), placeholder: 'project name', class: "form-control" %>
         </div>
       <% end %>
 

@@ -68,6 +68,8 @@ Samson::Application.routes.draw do
     end
   end
 
+  match '/deploys', to: 'deploys#index', via: :post
+
   resources :builds, only: [:index]
 
   resource :profile, only: [:show, :update]

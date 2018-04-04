@@ -10,6 +10,8 @@ class DeploysController < ApplicationController
   before_action :find_deploy, except: [:index, :active, :active_count, :new, :create, :confirm]
   before_action :stage, only: :new
 
+  skip_before_action :verify_authenticity_token, only: [:index]
+
   def active
     @deploys = deploys_scope.active
     render partial: 'deploys/table', layout: false if params[:partial]
@@ -135,10 +137,13 @@ class DeploysController < ApplicationController
       ).pluck(:id)
     end
 
-    if project_name = search[:project_name].presence
-      projects = Project.where(
-        Project.arel_table[:name].matches("%#{ActiveRecord::Base.send(:sanitize_sql_like, project_name)}%")
-      ).pluck(:id)
+    if project_names = search[:project_names].presence
+      project_name_array = project_names.split(',')
+      match_strings = project_name_array.map { |name| "%#{ActiveRecord::Base.send(:sanitize_sql_like, name)}%" }
+
+      arel = Project.arel_table[:name].matches_any(match_strings)
+
+      projects = Project.where(arel).pluck(:id)
     end
 
     if users || status || git_sha
