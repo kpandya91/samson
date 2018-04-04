@@ -35,6 +35,10 @@ ActiveSupport::Notifications.subscribe("job_queue.samson") do |*, payload|
   job_metrics.each { |key, value| Samson.statsd.gauge "job.#{key}", value }
 end
 
+ActiveSupport::Notifications.subscribe("job_status.samson") do |*, payload|
+  Samson.statsd.increment "jobs.#{payload.fetch(:type)}.#{payload.fetch(:status)}"
+end
+
 ActiveSupport::Notifications.subscribe("system_stats.samson") do |*, payload|
   payload.each { |key, value| Samson.statsd.gauge key.to_s, value }
 end

@@ -288,14 +288,14 @@ describe JobExecution do
   it 'can run with a block' do
     x = :not_called
     execution = JobExecution.new('master', job) { x = :called }
-    assert execution.send(:run)
+    execution.send(:run)
     x.must_equal :called
   end
 
   it "reports to statsd" do
     Samson.statsd.expects(:histogram).
       with('execute_shell.time', anything, tags: ['project:duck', 'stage:stage4', 'production:false'])
-    assert execute_job("master")
+    execute_job("master")
   end
 
   describe "builds_in_environment" do
